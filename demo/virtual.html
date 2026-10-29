@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>easy-data-scroll · виртуальный</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%232563eb%22/%3E%3Cpath d=%22M10 11h12M10 16h12M10 21h8%22 stroke=%22white%22 stroke-width=%222.4%22 stroke-linecap=%22round%22/%3E%3C/svg%3E">
+</head>
+<body>
+  <div class="app">
+    <main class="chat">
+      <header class="chat-head">
+        <div class="logo">∞</div>
+        <div>
+          <h1>Флудилка</h1>
+          <small id="status">Ползунок на всю историю, тащите куда угодно</small>
+        </div>
+        <div class="grow"></div>
+        <nav>
+          <a href="./">Витрина</a>
+          <a href="./chat.html">Чат</a>
+          <a href="./feed.html">Лента</a>
+          <a href="./virtual.html" aria-current="page">Виртуальный</a>
+          <a href="./vue.html">Vue</a>
+          <a href="./react.html">React</a>
+          <a href="./angular.html">Angular</a>
+        </nav>
+      </header>
+      <div class="list" id="list"></div>
+      <button class="down" id="down" type="button" aria-label="Вниз">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        <span class="badge" id="badge"></span>
+      </button>
+      <form class="composer" id="composer">
+        <textarea id="input" rows="1" placeholder="Сообщение"></textarea>
+        <button type="submit">Отправить</button>
+      </form>
+    </main>
+    <aside class="hud" id="hud"></aside>
+  </div>
+  <script type="module" src="./virtual.ts"></script>
+</body>
+</html>

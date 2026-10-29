@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>easy-data-scroll · лента</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%232563eb%22/%3E%3Cpath d=%22M10 11h12M10 16h12M10 21h8%22 stroke=%22white%22 stroke-width=%222.4%22 stroke-linecap=%22round%22/%3E%3C/svg%3E">
+</head>
+<body>
+  <div class="app">
+    <main class="chat feed">
+      <header class="chat-head">
+        <div class="logo">∞</div>
+        <div>
+          <h1>Лента</h1>
+          <small>свежее сверху, подгрузка вниз</small>
+        </div>
+        <div class="grow"></div>
+        <nav>
+          <a href="./">Витрина</a>
+          <a href="./chat.html">Чат</a>
+          <a href="./feed.html" aria-current="page">Лента</a>
+          <a href="./virtual.html">Виртуальный</a>
+          <a href="./vue.html">Vue</a>
+          <a href="./react.html">React</a>
+          <a href="./angular.html">Angular</a>
+        </nav>
+      </header>
+      <button class="fresh" id="fresh" type="button"></button>
+      <div class="list" id="list"></div>
+    </main>
+  </div>
+  <script type="module" src="./feed.ts"></script>
+</body>
+</html>
