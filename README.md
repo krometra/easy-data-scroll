@@ -204,6 +204,10 @@ export class ChatComponent implements AfterViewInit, OnDestroy {
 
 Вывод проверяется тестами типов (`test/types.test.ts`, `test/react-types.test.tsx`), а шаблоны Vue — `vue-tsc` на TypeScript 5.9 против собранного пакета.
 
+## В @krometra/ui-kit
+
+В ките есть `KVirtualList` (с версии 0.9.0): тот же Vue-компонент с цветами плашек и спиннера из токенов кита и пропсами `height`, `bordered`. Все пропсы, события и методы — как здесь.
+
 ## Любой другой фреймворк
 
 Адаптер описывается четырьмя функциями:
