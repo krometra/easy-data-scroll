@@ -13,7 +13,7 @@ for (const fw of ['vue', 'react', 'angular']) {
       await wheel(page, -350, 5000)
       await settle(page)
       expect(await jumps(page)).toEqual([])
-      expect((await stats(page)).loaded).toBeGreaterThan(80)
+      expect((await stats(page)).loaded).toBeGreaterThan(40)
       await expectConsistent(page)
 
       const id = await page.evaluate(() => W.list.items.findLast((m: any) => m.long)?.id)

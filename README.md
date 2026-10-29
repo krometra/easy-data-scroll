@@ -19,7 +19,9 @@ npm install @krometra/easy-data-scroll
 npm install github:krometra/easy-data-scroll#v0.1.0
 ```
 
-Публикация в npm происходит по тегу `v*`, если задан секрет `NPM_TOKEN`.
+Публикация в npm происходит по тегу `v*`: workflow `publish.yml` выкладывает пакет через
+Trusted Publishing (OIDC), токен в секретах не нужен. Версию, которая уже есть в npm,
+он пропускает.
 Фреймворки — необязательные peer-зависимости: ставится только тот, которым
 пользуетесь.
 

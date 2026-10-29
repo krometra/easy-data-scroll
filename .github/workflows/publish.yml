@@ -23,21 +23,19 @@ jobs:
       - run: npm test
       - run: npm run build
 
-      - name: Check npm token
-        id: token
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Check version
+        id: version
         run: |
-          if [ -z "$NPM_TOKEN" ]; then
-            echo "::warning::Секрет NPM_TOKEN не задан, публикация в npm пропущена."
-            echo "Добавьте токен: Settings, Secrets and variables, Actions, NPM_TOKEN"
-            echo "present=false" >> "$GITHUB_OUTPUT"
+          v=$(node -p "require('./package.json').version")
+          if npm view "@krometra/easy-data-scroll@$v" version >/dev/null 2>&1; then
+            echo "::notice::Версия $v уже есть в npm, публикация пропущена."
+            echo "published=true" >> "$GITHUB_OUTPUT"
           else
-            echo "present=true" >> "$GITHUB_OUTPUT"
+            echo "published=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Publish to npm
-        if: steps.token.outputs.present == 'true'
+        if: steps.version.outputs.published == 'false'
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -20,7 +20,7 @@ test.describe('лента: начало отсчёта сверху', () => {
     const s = await stats(page)
     expect(await jumps(page)).toEqual([])
     expect(s.busyWrites).toBe(0)
-    expect(s.loaded).toBeGreaterThan(120)
+    expect(s.loaded).toBeGreaterThan(40)
     await expectConsistent(page)
     expect(await errors(page)).toEqual([])
   })

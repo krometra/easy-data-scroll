@@ -8,7 +8,7 @@
 - Сборка библиотеки: просто `tsc -p tsconfig.build.json` в `dist/` (ESM + d.ts), без бандлера.
 - Пакет `@krometra/easy-data-scroll`, репозиторий `github.com/krometra/easy-data-scroll` (публичный, оформлен по образцу `krometra/ui-kit`). Адаптеры подпутями: `/vue`, `/react`, `/angular`. Фреймворки — необязательные peer-зависимости.
 - Витрина на GitHub Pages (<https://krometra.github.io/easy-data-scroll/>) собрана на `@krometra/ui-kit` (dev-зависимость, только для демо). Деплой — workflow `pages.yml` на push в `main`.
-- Публикация в npm — workflow `publish.yml` по тегу `v*`, нужен секрет репозитория `NPM_TOKEN` (секретов на уровне организации нет). Выпуск: версия в `package.json`, раздел «Что изменилось в X.Y.Z» в `README.md`, коммит `Версия X.Y.Z: ...`, тег `vX.Y.Z`, push тега.
+- Публикация в npm — workflow `publish.yml` по тегу `v*` через Trusted Publishing (OIDC, на npmjs.com у пакета указан `krometra/easy-data-scroll` и `publish.yml`), секрет не нужен; уже опубликованную версию пропускает. Секретов на уровне организации нет, `NPM_TOKEN` кита лежит в его собственном репозитории. Выпуск: версия в `package.json`, раздел «Что изменилось в X.Y.Z» в `README.md`, коммит `Версия X.Y.Z: ...`, тег `vX.Y.Z`, push тега.
 - В исходниках относительные импорты с `.js` (`from './core.js'`), иначе webpack 5 и Node не разрешат `dist` при `"type": "module"`.
 - Комментарии в коде не писать.
 

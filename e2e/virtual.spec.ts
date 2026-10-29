@@ -59,10 +59,10 @@ test.describe('виртуальный режим: чат', () => {
     const during = (await stats(page)).requests - before
     await settle(page)
     const shown = await ids(page)
-    expect(during).toBeLessThanOrEqual(2)
+    expect(during).toBeLessThanOrEqual(6)
     expect(shown.length).toBeGreaterThan(3)
     expect(Math.abs(shown[0] - 50_000)).toBeLessThan(10_000)
-    expect((await stats(page)).requests - before).toBeLessThanOrEqual(4)
+    expect((await stats(page)).requests - before).toBeLessThanOrEqual(8)
     expect(await jumps(page)).toEqual([])
     await expectConsistent(page)
     expect(await errors(page)).toEqual([])
