@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref, shallowRef, useTemplateRef } from 'vue'
 import { InfinityScroll, type InfinityScrollExpose } from '@krometra/easy-data-scroll/vue'
-import { Backend, ME, TOTAL, type Message as Msg } from '../shared/backend'
+import { Backend, ME, TOTAL, USERS, type Message as Msg } from '../shared/backend'
 import { startProbe, type Probe } from '../shared/hud'
 import Message from '../vue/Message.vue'
 import '../shared/messages.css'
@@ -12,6 +12,10 @@ const demo = ref<Demo>('virtual')
 const latency = ref(600)
 const live = ref(true)
 const jumpTo = ref('31337')
+const author = ref('all')
+const total = ref<number | undefined>(TOTAL)
+const authors = [{ value: 'all', label: 'Все авторы' }, ...USERS.map(u => ({ value: String(u.id), label: u.name }))]
+const filter = computed(() => (author.value === 'all' ? undefined : Number(author.value)))
 
 const demos = [
   { value: 'virtual', label: 'Чат · виртуальный' },
@@ -47,7 +51,7 @@ async function loadFeed(m?: Msg) {
 }
 
 function loadRange(from: number, to: number) {
-  return backend.rows(from, to)
+  return backend.rows(from, to, filter.value)
 }
 
 function feedItem(m: Msg): Msg {
@@ -97,8 +101,11 @@ let incoming = 0
 function scheduleIncoming() {
   incoming = window.setTimeout(() => {
     const list = scroll.value
-    if (live.value && list && demo.value !== 'feed')
-      void list.append([backend.incoming()])
+    if (live.value && list && demo.value !== 'feed') {
+      const m = backend.incoming()
+      if (!virtual.value || filter.value === undefined || m.user.id === filter.value)
+        void list.append([m])
+    }
     scheduleIncoming()
   }, 2500 + Math.random() * 4000)
 }
@@ -149,6 +156,7 @@ const fmt = (n: number) => n.toLocaleString('ru-RU')
         <KSegmented v-model="latency" :options="latencies" size="sm" />
       </div>
       <KSwitch v-model="live" label="Входящие сообщения" :disabled="demo === 'feed'" />
+      <KSelect v-if="virtual" v-model="author" class="live__author" :options="authors" size="sm" />
       <div class="live__jump">
         <KInput v-model="jumpTo" size="sm" inline label="К сообщению №" type="number" />
         <KButton size="sm" variant="secondary" icon="search" @click="jump">Перейти</KButton>
@@ -168,7 +176,8 @@ const fmt = (n: number) => n.toLocaleString('ru-RU')
         class="list"
         mode="virtual"
         origin="bottom"
-        :total="TOTAL"
+        v-model:total="total"
+        :query="filter"
         :page-size="40"
         :estimated-height="80"
         :get-key="m => m.id"
@@ -208,7 +217,12 @@ const fmt = (n: number) => n.toLocaleString('ru-RU')
     </div>
 
     <div class="live__stats">
-      <KStat label="Загружено" :value="virtual ? `${fmt(stats.loaded)} из ${fmt(stats.total)}` : fmt(stats.loaded)" icon="download" />
+      <KStat
+        label="Загружено"
+        :value="virtual ? `${fmt(stats.loaded)} из ${fmt(total ?? stats.total)}` : fmt(stats.loaded)"
+        :hint="virtual ? (filter === undefined ? 'total с бэкенда' : 'total по фильтру с бэкенда') : ''"
+        icon="download"
+      />
       <KStat label="В DOM сейчас" :value="stats.rendered" hint="элементов на экране и рядом" icon="list" />
       <KStat label="Поправок во время прокрутки" :value="stats.busy" :tone="stats.busy ? 'danger' : 'success'" icon="move" />
       <KStat label="Сдвигов содержимого" :value="stats.jumps" :tone="stats.jumps ? 'danger' : 'success'" icon="check" />
@@ -235,6 +249,7 @@ const fmt = (n: number) => n.toLocaleString('ru-RU')
   color: var(--k-text-muted);
 }
 .live__grow { flex: 1; }
+.live__author { width: 11rem; }
 .live__jump :deep(.k-input__box) { width: 6.5rem; }
 .live__frame {
   --bg: var(--k-bg);

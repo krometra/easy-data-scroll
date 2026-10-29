@@ -1,6 +1,7 @@
 import {
   forwardRef,
   memo,
+  useEffect,
   useImperativeHandle,
   useLayoutEffect,
   useReducer,
@@ -31,6 +32,8 @@ export interface InfinityScrollProps<T> extends CoreOptions<T> {
   onStickChange?: (stuck: boolean) => void
   onVisibleChange?: (range: VisibleRange<T> | null) => void
   onLoadStateChange?: (side: LoadSide, state: LoadState, error?: unknown) => void
+  onTotalChange?: (total: number) => void
+  query?: unknown
 }
 
 export interface InfinityScrollHandle<T> {
@@ -58,6 +61,10 @@ interface PortalProps {
   item: unknown
   v: number
   render: (item: any) => ReactNode
+}
+
+function queryKey(q: unknown): unknown {
+  return q !== null && typeof q === 'object' ? JSON.stringify(q) : q
 }
 
 const Portal = memo(({ host, item, render }: PortalProps) => createPortal(render(item), host))
@@ -116,6 +123,7 @@ function InfinityScrollInner<T>(props: InfinityScrollProps<T>, ref: Ref<Infinity
       onStickChange: stuck => latest.current.onStickChange?.(stuck),
       onVisibleChange: range => latest.current.onVisibleChange?.(range),
       onLoadStateChange: (side, state, error) => latest.current.onLoadStateChange?.(side, state, error),
+      onTotalChange: total => latest.current.onTotalChange?.(total),
     })
     list.current = core
     return () => {
@@ -125,6 +133,21 @@ function InfinityScrollInner<T>(props: InfinityScrollProps<T>, ref: Ref<Infinity
       map.clear()
     }
   }, [])
+
+  const query = queryKey(props.query)
+  const lastQuery = useRef(query)
+  useEffect(() => {
+    if (Object.is(lastQuery.current, query))
+      return
+    lastQuery.current = query
+    void list.current?.reset(undefined, { total: null })
+  }, [query])
+
+  useEffect(() => {
+    const core = list.current
+    if (core && props.total !== undefined && props.total !== core.total)
+      core.setTotal(props.total)
+  }, [props.total])
 
   useImperativeHandle(ref, () => ({
     get list() {

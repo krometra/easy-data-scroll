@@ -50,6 +50,8 @@ describe('типы', () => {
     expectTypeOf(coreInfinite).returns.toEqualTypeOf<InfinityScroll<Msg>>()
     expectTypeOf<InfinityScroll<Msg>['items']>().toEqualTypeOf<Msg[]>()
     expectTypeOf<ReturnType<InfinityScroll<Msg>['get']>>().toEqualTypeOf<Msg | undefined>()
+    expectTypeOf<InfinityScroll<Msg>['setTotal']>().toEqualTypeOf<(total: number) => void>()
+    expectTypeOf<InfinityScroll<Msg>['total']>().toEqualTypeOf<number>()
   })
 
   it('angularRenderer берёт тип из входа компонента', () => {
@@ -62,5 +64,7 @@ describe('типы', () => {
     expectTypeOf<Parameters<NonNullable<Ctx['slots']['default']>>[0]>().toEqualTypeOf<{ item: Msg }>()
     expectTypeOf<Parameters<Ctx['expose']>[0]>().toEqualTypeOf<InfinityScrollExpose<Msg>>()
     expectTypeOf<Parameters<NonNullable<Ctx['props']['onVisible']>>[0]>().toEqualTypeOf<VisibleRange<Msg> | null>()
+    expectTypeOf<Ctx['props']['onUpdate:total']>().toEqualTypeOf<((total: number) => void) | undefined>()
+    expectTypeOf<Ctx['props']['query']>().toEqualTypeOf<unknown>()
   })
 })

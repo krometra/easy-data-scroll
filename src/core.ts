@@ -50,6 +50,7 @@ export interface InfinityScrollOptions<T> {
   onStickChange?: (stuck: boolean) => void
   onVisibleChange?: (range: VisibleRange<T> | null) => void
   onLoadStateChange?: (side: LoadSide, state: LoadState, error?: unknown) => void
+  onTotalChange?: (total: number) => void
 }
 
 export interface ResetOptions {
@@ -57,7 +58,7 @@ export interface ResetOptions {
   hasAfter?: boolean
   anchor?: Key
   align?: Align
-  total?: number
+  total?: number | null
   index?: number
 }
 
@@ -180,6 +181,7 @@ export class InfinityScroll<T> {
   private visible: [number, number, Entry<T> | null, Entry<T> | null] = [-1, -1, null, null]
   private structGen = 0
   private rowVar = 0
+  private lastTotal = -1
   private pattern = 0
   private seen: [number, number, number] | null = null
   private pin: { row: number, align: Align } | null = null
@@ -433,7 +435,7 @@ export class InfinityScroll<T> {
     this.structGen++
     this.more.before = false
     this.more.after = false
-    const known = options.total ?? (prev || this.o.total)
+    const known = options.total === null ? undefined : (options.total ?? (prev || this.o.total))
     const filled = entries.length ? start + entries.length : 0
     const t = known !== undefined ? Math.max(known, filled) : filled
     if (t > 0)
@@ -484,6 +486,22 @@ export class InfinityScroll<T> {
     this.pin = this.virtual ? { row, align } : null
     this.scrollToPos(this.rowPos(row, align, options.offset ?? 0), options.behavior)
     return true
+  }
+
+  setTotal(total: number): void {
+    if (!this.virtual || !Number.isFinite(total))
+      return
+    const t = Math.max(0, Math.floor(total))
+    const rows = this.layout.rows()
+    if (t === rows)
+      return
+    if (t > rows)
+      this.growTail(t - rows)
+    else
+      this.shrinkTail(rows - t, true)
+    this.structGen++
+    this.flushCommit()
+    this.sync()
   }
 
   indexOfKey(key: Key): number {
@@ -1187,6 +1205,11 @@ export class InfinityScroll<T> {
 
     this.emitVisible(v0, v1)
     if (this.virtual) {
+      const total = L.rows()
+      if (total !== this.lastTotal) {
+        this.lastTotal = total
+        this.o.onTotalChange?.(total)
+      }
       this.paintRow(v0, v1)
       this.paintPattern(pos)
       this.checkRange(v0, v1)
@@ -1474,7 +1497,7 @@ export class InfinityScroll<T> {
     this.refreshSpacers()
   }
 
-  private shrinkTail(count: number): void {
+  private shrinkTail(count: number, loaded = false): void {
     const L = this.layout
     const p0 = this.getPos()
     let left = count
@@ -1482,8 +1505,21 @@ export class InfinityScroll<T> {
     while (left > 0 && L.length) {
       const i = L.length - 1
       const g = L.list[i]
-      if (!g.gap)
+      if (!g.gap && !loaded)
         break
+      if (!g.gap) {
+        left--
+        d += g.height
+        this.keys.delete(g.key)
+        this.pending.delete(g)
+        this.destroyNode(g)
+        L.remove(i)
+        if (this.re > i)
+          this.re = i
+        if (this.rs > i)
+          this.rs = i
+        continue
+      }
       if (g.count <= left) {
         left -= g.count
         d += g.height

@@ -82,6 +82,8 @@ const options = [
   { name: 'mediaTimeout, idleDelay', def: '1500, 150', text: 'Сколько ждать картинки при замере и паузу после прокрутки, мс' },
   { name: 'animate', def: 'true', text: 'Плавное появление новых сообщений у низа и строк на месте плашек' },
   { name: 'onStickChange, onVisibleChange, onLoadStateChange', def: '', text: 'Прилип ли список к краю, видимый диапазон, состояние загрузки' },
+  { name: 'onTotalChange(total)', def: '', text: 'Общее число строк изменилось: total пришёл с бэкенда или задан через setTotal (virtual)' },
+  { name: 'query (Vue, React)', def: '', text: 'Фильтры: сменились — список перезагружается, total берётся из первого ответа' },
 ]
 
 const methodColumns = [
@@ -94,7 +96,8 @@ const methods = [
   { name: 'scrollToKey(key, opts)', text: 'Прокрутить к загруженному элементу' },
   { name: 'scrollToIndex(index, opts)', text: 'Прокрутить к строке по номеру; в virtual она догрузится и останется на месте' },
   { name: 'scrollToTop(), scrollToBottom()', text: 'К краю; если край не загружен, список перезагрузится' },
-  { name: 'reset(items?, opts)', text: 'Заменить всё, например прыжок к сообщению из поиска' },
+  { name: 'reset(items?, opts)', text: 'Заменить всё, например прыжок к сообщению из поиска или смена фильтров' },
+  { name: 'setTotal(n)', text: 'Задать общее число строк: хвост достраивается плашками или обрезается (virtual)' },
   { name: 'refresh(), destroy()', text: 'Перемерить всё после смены шрифта или темы, снять всё' },
 ]
 

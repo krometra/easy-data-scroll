@@ -20,7 +20,7 @@ export interface Message {
 
 export const ME: User = { id: 0, name: 'Я', color: '#3b82f6' }
 
-const USERS: User[] = [
+export const USERS: User[] = [
   { id: 1, name: 'Кот Бублик', color: '#f97316' },
   { id: 2, name: 'Сова Луна', color: '#a855f7' },
   { id: 3, name: 'Ёж Колючкин', color: '#10b981' },
@@ -135,6 +135,7 @@ export class Backend {
   private lastId = TOTAL
   private seq = 0
   calls = 0
+  private byAuthor = new Map<number, number[]>()
 
   constructor(private opts: BackendOptions) {}
 
@@ -174,10 +175,27 @@ export class Backend {
     return { items, done: !items.length || items[items.length - 1].id >= this.lastId }
   }
 
-  async rows(from: number, to: number): Promise<{ items: Message[], total: number }> {
+  async rows(from: number, to: number, author?: number): Promise<{ items: Message[], total: number }> {
     this.calls++
     await this.wait()
-    return { items: this.range(from + 1, to), total: this.lastId }
+    if (author === undefined)
+      return { items: this.range(from + 1, to), total: this.lastId }
+    const ids = this.idsOf(author)
+    return { items: ids.slice(from, to).map(id => this.get(id)!), total: ids.length }
+  }
+
+  private idsOf(author: number): number[] {
+    let ids = this.byAuthor.get(author)
+    if (!ids) {
+      ids = []
+      for (let id = 1; id <= TOTAL; id++) {
+        if (authorOf(id).id === author)
+          ids.push(id)
+      }
+      this.byAuthor.set(author, ids)
+    }
+    const extra = this.extra.filter(m => m.user.id === author).map(m => m.id)
+    return extra.length ? ids.concat(extra) : ids
   }
 
   async around(id: number, limit = 40): Promise<Message[]> {

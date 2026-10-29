@@ -7,6 +7,7 @@ import {
   shallowReactive,
   shallowRef,
   Teleport,
+  watch,
   type AllowedComponentProps,
   type ComponentCustomProps,
   type PropType,
@@ -49,6 +50,7 @@ export interface InfinityScrollProps<T> {
   mode?: Mode
   loadRange?: RangeLoader<T>
   total?: number
+  query?: unknown
   pageSize?: number
   estimatedHeight?: number
   maxItems?: number
@@ -67,6 +69,7 @@ export interface InfinityScrollProps<T> {
   onStick?: (stuck: boolean) => void
   onVisible?: (range: VisibleRange<T> | null) => void
   onLoadState?: (side: LoadSide, state: LoadState, error?: unknown) => void
+  'onUpdate:total'?: (total: number) => void
 }
 
 export interface InfinityScrollSlots<T> {
@@ -77,6 +80,7 @@ export interface InfinityScrollEmit<T> {
   (event: 'stick', stuck: boolean): void
   (event: 'visible', range: VisibleRange<T> | null): void
   (event: 'loadState', side: LoadSide, state: LoadState, error?: unknown): void
+  (event: 'update:total', total: number): void
 }
 
 interface InfinityScrollContext<T> {
@@ -115,6 +119,10 @@ const Portal = defineComponent({
   },
 })
 
+function queryKey(q: unknown): unknown {
+  return q !== null && typeof q === 'object' ? JSON.stringify(q) : q
+}
+
 const Component = defineComponent({
   name: 'InfinityScroll',
   props: {
@@ -123,6 +131,7 @@ const Component = defineComponent({
     mode: { type: String as PropType<Mode>, default: undefined },
     loadRange: { type: Function as PropType<RangeLoader<any>>, default: undefined },
     total: { type: Number, default: undefined },
+    query: { type: null as unknown as PropType<unknown>, default: undefined },
     pageSize: { type: Number, default: undefined },
     estimatedHeight: { type: Number, default: undefined },
     maxItems: { type: Number, default: undefined },
@@ -143,6 +152,7 @@ const Component = defineComponent({
     stick: (_stuck: boolean) => true,
     visible: (_range: VisibleRange<any> | null) => true,
     loadState: (_side: LoadSide, _state: LoadState, _error?: unknown) => true,
+    'update:total': (_total: number) => true,
   },
   slots: Object as SlotsType<{ default: { item: any } }>,
   setup(props, { slots, emit, expose }) {
@@ -188,7 +198,21 @@ const Component = defineComponent({
         onStickChange: stuck => emit('stick', stuck),
         onVisibleChange: range => emit('visible', range),
         onLoadStateChange: (side, state, error) => emit('loadState', side, state, error),
+        onTotalChange: (total) => {
+          if (total !== props.total)
+            emit('update:total', total)
+        },
       })
+    })
+
+    watch(() => queryKey(props.query), () => {
+      if (list)
+        void list.reset(undefined, { total: null })
+    })
+
+    watch(() => props.total, (total) => {
+      if (list && total !== undefined && total !== list.total)
+        list.setTotal(total)
     })
 
     onBeforeUnmount(() => {

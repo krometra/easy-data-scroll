@@ -37,8 +37,6 @@ jobs:
       - name: Publish to npm
         if: steps.version.outputs.published == 'false'
         run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Pack tarball
         run: npm pack

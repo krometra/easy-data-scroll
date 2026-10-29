@@ -53,10 +53,14 @@ const scroll = useTemplateRef<InfinityScrollExpose<Message>>('scroll')
   </InfinityScroll>
 </template>`,
     virtual: `<script setup lang="ts">
+import { ref } from 'vue'
 import { InfinityScroll } from '@krometra/easy-data-scroll/vue'
 
+const filters = ref({ author: null })
+const total = ref<number>()
+
 function loadRange(from: number, to: number) {
-  return api.messages({ offset: from, limit: to - from })
+  return api.messages({ ...filters.value, offset: from, limit: to - from })
 }
 </script>
 
@@ -65,7 +69,8 @@ function loadRange(from: number, to: number) {
     class="chat"
     mode="virtual"
     origin="bottom"
-    :total="total"
+    v-model:total="total"
+    :query="filters"
     :get-key="m => m.id"
     :load-range="loadRange"
   >
@@ -92,19 +97,25 @@ export function Chat() {
     />
   )
 }`,
-    virtual: `import { InfinityScroll } from '@krometra/easy-data-scroll/react'
+    virtual: `import { useState } from 'react'
+import { InfinityScroll } from '@krometra/easy-data-scroll/react'
 
-export function Chat({ total }: { total: number }) {
+export function Chat({ filters }: { filters: Filters }) {
+  const [total, setTotal] = useState<number>()
   return (
-    <InfinityScroll
-      className="chat"
-      mode="virtual"
-      origin="bottom"
-      total={total}
-      getKey={m => m.id}
-      loadRange={(from, to) => api.messages({ offset: from, limit: to - from })}
-      renderItem={renderMessage}
-    />
+    <>
+      <small>Найдено: {total}</small>
+      <InfinityScroll
+        className="chat"
+        mode="virtual"
+        origin="bottom"
+        query={filters}
+        onTotalChange={setTotal}
+        getKey={m => m.id}
+        loadRange={(from, to) => api.messages({ ...filters, offset: from, limit: to - from })}
+        renderItem={renderMessage}
+      />
+    </>
   )
 }`,
   },
@@ -160,7 +171,7 @@ export class ChatComponent implements AfterViewInit, OnDestroy {
 
 export const notes: Record<Framework, string> = {
   js: 'Тип строки выводится из загрузчика: render, getKey и колбэки получают Message без явного дженерика.',
-  vue: 'Компонент обобщённый: T выводится из load-range или load-before, и в слоте item уже типа Message. Методы — через ref.',
+  vue: 'Компонент обобщённый: T выводится из load-range или load-before, и в слоте item уже типа Message. total приходит с бэкенда в v-model:total, смена query перезагружает список.',
   react: 'Тип строки выводится из загрузчика и доходит до renderItem. Держите renderItem стабильным (вне компонента или useCallback).',
   angular: 'angularRenderer берёт тип из входа item компонента (обычного @Input или сигнального input()). Компоненты подключаются к ApplicationRef, DI работает.',
 }
